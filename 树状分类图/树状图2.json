@@ -1,0 +1,159 @@
+//用户用电负荷曲线分解
+
+import echarts from "echarts";
+import { indeustryClassify } from "../../server/loadForecastService"
+
+let classifyWay = {
+    destroy() {   //实例销毁之前需要释放
+        this.chartDiv = null;
+        this.chart.dispose();
+        this.chart = null;
+        this.option = null;
+        this.originalData = null;
+        this.data = null;
+    },
+    async init(divId, val) {
+        this.cons_no = "",
+        this.originalData = await indeustryClassify(val);
+        this.chartDiv = document.getElementById(divId);
+        this.chart = echarts.init(this.chartDiv);
+        this.initChartOption();
+    },
+    showChart() {
+        this.chart.setOption(this.option);
+    },
+    initChartOption() {
+        
+        this.option = {
+            tooltip: {},
+            animationDurationUpdate: 1500,
+            animationEasingUpdate: 'quinticInOut',
+            color: ['#83e0ff', '#45f5ce', '#b158ff'],
+            legend: {
+                show: false
+                // data: [
+                //     { name: '人', textStyle: { color: '#fff' } },
+                //     { name: '物证', textStyle: { color: '#fff' } },
+                //     { name: '不明物体', textStyle: { color: '#fff' } }
+                // ]
+            },
+            series: [
+                {
+                    type: 'graph',
+                    layout: 'force',
+                    force: {
+                        repulsion: 1000,
+                        edgeLength: 50
+                    },
+                    silent:false,
+                    symbolSize: 50,
+                    roam: true,
+                    label: {
+                        normal: {
+                            show: true
+                        }
+                    },
+                    edgeSymbolSize: [4, 10],
+                    edgeLabel: {
+                        normal: {
+                            show: true,
+                            textStyle: {
+                                fontSize: 12
+                            },
+                            formatter: "{c}"
+                        }
+                    },
+
+                    data: [
+                        {
+                            name: '全部',
+                            symbolSize: 100,
+                            draggable: true,
+                            category: 1,
+                            cons_no:"",
+                            itemStyle: {
+                                normal: {
+                                    borderColor: '#04f2a7',
+                                    borderWidth: 6,
+                                    shadowBlur: 20,
+                                    shadowColor: '#04f2a7',
+                                    color: '#001c43',
+                                }
+                            }
+                        }
+                    ],
+                    links: [],
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.9,
+                            width: 5,
+                            curveness: 0
+                        }
+                    },
+                    categories: [
+                        { name: '人' },
+                        { name: '物证' },
+                        { name: '不明物体' }
+                    ]
+                }
+            ]
+        }
+        console.log(this.originalData)
+        this.originalData.forEach(val=>{
+            this.option.series[0].data.push(
+                {
+                    name: val.industry_name,
+                    symbolSize: 70,
+                    itemStyle: {
+                        normal: {
+                            borderColor: '#04f2a7',
+                            borderWidth: 4,
+                            shadowBlur: 10,
+                            shadowColor: '#04f2a7',
+                            color: '#001c43',
+                        }
+                    },
+                    category: 1,
+                    cons_no:val.industry_no
+                }
+            )
+            this.option.series[0].links.push(
+                {
+                    source: '全部',
+                    target: val.industry_name,
+                    value: '',
+                    lineStyle: {
+                        normal: {
+                            color: {
+                                type: 'linear',
+                                x: 0,
+                                y: 0,
+                                x2: 0,
+                                y2: 20,
+                                colorStops: [{
+                                    offset: 0, color: '#e0f55a' // 0% 处的颜色
+                                }, {
+                                    offset: 1, color: '#639564' // 100% 处的颜色
+                                }],
+                                globalCoord: false // 缺省为 false
+                            }
+                        }
+                    }
+
+                }
+            )
+        })
+    },
+    // changeTheme(theme) {
+    //     if (theme === 'dark') {
+    //         this.option.textStyle.color = 'white';
+    //         this.option.title.textStyle.color = 'white';
+    //     } else if (theme === 'light') {
+    //         this.option.textStyle.color = 'black';
+    //         this.option.title.textStyle.color = 'black';
+    //     }
+    //     this.chart.setOption(this.option);
+    // }
+
+}
+export default classifyWay
