@@ -1,0 +1,52 @@
+drag(obj,parentNode){   //obj：被拖动元素的id, parentNode：被拖动元素相对拖动的父盒子id
+            var obj = document.getElementById(obj);
+            if(arguments.length == 1){
+              var parentNode = window.self; 
+              var pWidth = parentNode.innerWidth,pHeight = parentNode.innerHeight;  
+              /*console.log("pWidth:"+pWidth+",pHeight:"+pHeight);*/
+            }else{
+              var parentNode = document.getElementById(parentNode);
+             var pWidth = parentNode.offsetWidth,pHeight = parentNode.offsetHeight;
+          }
+           obj.onmousedown = function(ev){
+             var ev = ev || event;
+             /*console.log("clientX:"+ev.clientX+",clientY:"+ev.clientY);
+             console.log("this.offsetLeft:"+this.offsetLeft+",this.offsetTop:"+this.offsetTop);*/
+             var disX = ev.clientX - this.offsetLeft,disY = ev.clientY - this.offsetTop;
+             var oWidth = obj.offsetWidth,oHeight = obj.offsetHeight;
+               
+             //阻止冒泡时间
+             ev.stopPropagation ? ev.stopPropagation() : ev.cancelBubble = true;
+           
+              
+             document.onmousemove = function(ev){
+               var ev = ev || event;
+               obj.style.left = ev.clientX - disX + 'px';
+               obj.style.top = ev.clientY - disY+ 'px';
+               /*console.log("disX:"+disX+",disY:"+disY);  
+               console.log("obj.style.left:"+obj.style.left+",obj.style.top:"+obj.style.top);  */
+               //左侧
+               if(obj.offsetLeft <=0){
+                 obj.style.left = 0;
+              /* console.log("111111111111111111111111");*/
+              };
+               //右侧
+               if(obj.offsetLeft >= pWidth - oWidth){
+                 obj.style.left = pWidth - oWidth + 'px'; 
+               };
+               //上面
+               if(obj.offsetTop <= 0){
+                 obj.style.top = 0; 
+               };
+               //下面
+             if(obj.offsetTop >= pHeight - oHeight){
+                obj.style.top = pHeight - oHeight + 'px'; 
+               };
+             };
+             document.onmouseup = function(ev){
+               var ev = ev || event;
+               document.onmousemove = document.onmouseup = null;
+             };
+           }
+               
+     }
